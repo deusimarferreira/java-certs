@@ -15,12 +15,12 @@ keytool --help
 ```
 > Download do certificado de um determinado site
 ```shell script
-keytool -J-Djava.net.useSystemProxies=true -printcert -rfc -sslserver hom.login.sigac.serpro.gov.br:443 > sigac-hom.pem
+keytool -J-Djava.net.useSystemProxies=true -printcert -rfc -sslserver www.google.com.br:443 > google.pem
 ```
 
 > Importar certificado (.pem) para o keystore
 ```shell script
-keytool -importcert -file sigac-hom.pem -alias sigac-hom -storepass changeit -keystore ...cacerts
+keytool -importcert -file google.pem -alias google -storepass changeit -keystore /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/security/cacerts
 ```
 
 > Listar certificado por alias
