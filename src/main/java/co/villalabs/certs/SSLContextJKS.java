@@ -10,7 +10,7 @@ import javax.net.ssl.TrustManagerFactory;
 
 public class SSLContextJKS {
 
-    private final static String CACERTS_DIR = "cacerts";
+    private final static String CACERTS_DIR = "C:\\clientes\\CNPq\\dev\\jdk\\jdk1.7.0_131\\jre\\lib\\security\\cacerts";
     private final static String CACERTS_PASSWD = "changeit";
 
     /**

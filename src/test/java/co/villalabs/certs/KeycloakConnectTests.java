@@ -1,10 +1,7 @@
 package co.villalabs.certs;
 
-import java.io.BufferedWriter;
 import java.io.DataOutputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -19,6 +16,7 @@ import com.auth0.jwk.Jwk;
 import com.auth0.jwk.JwkException;
 import com.auth0.jwk.JwkProvider;
 import com.auth0.jwk.UrlJwkProvider;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -29,11 +27,11 @@ public class KeycloakConnectTests {
 	private static String REALM = "teste";
 	private static String URL_TOKEN_ENDPOINT = URL_AUTH + "/realms/" + REALM + "/protocol/openid-connect/token";
 	private static String URL_CERTS_ENDPOINT = URL_AUTH + "/realms/" + REALM + "/protocol/openid-connect/certs";
-	private static String KID_SECRET_PUBLIC = "";
+	private static String KID_SECRET_PUBLIC;
 	private static String JWT;
 	
 	@Test
-	public void testKeycloak() {
+	public void testPasso1GetToken() {
         System.out.println("Keycloak GET Token JWT");
         
         String client = "";
@@ -85,7 +83,7 @@ public class KeycloakConnectTests {
     }
 	
 	@Test
-	public void testGetKeycloakCerts() {
+	public void testPasso2GetKid() {
         System.out.println("Keycloak JWK - Recuperar JSON Web Key");
 
         try {
@@ -108,7 +106,11 @@ public class KeycloakConnectTests {
 	            	dados = reader.read();
 	            };
 	            reader.close();
-	            System.out.println(json);
+	            ObjectMapper mapper = new ObjectMapper();
+	            KeysParser parser = mapper.readValue(json, KeysParser.class);
+	            KID_SECRET_PUBLIC = parser.keys[0].kid;
+	            System.out.println("JSON Web Key: " + json);
+	            System.out.println("Kid: " + KID_SECRET_PUBLIC);
             }
 
         } catch (Exception ex) {
@@ -117,11 +119,9 @@ public class KeycloakConnectTests {
     }
 	
 	@Test
-	public void testJwk() {
+	public void testPasso3ValidarToken() {
 		System.out.println("Jwk - Get Provider JSON Web Key");
-        
-        JWT = "";
-
+		
         try {
         	
             JwkProvider provider = new UrlJwkProvider(new URL(URL_CERTS_ENDPOINT));
@@ -130,8 +130,8 @@ public class KeycloakConnectTests {
             
             Claims claims = Jwts.parserBuilder().setSigningKey(jwk.getPublicKey())
             		.build().parseClaimsJws(JWT).getBody();
-            String email = claims.get("email", String.class);
-            System.out.println(email);
+            System.out.println("Nome: " + claims.get("name", String.class));
+            System.out.println("E-mail: " + claims.get("email", String.class));
         } catch (JwkException ex) {
             ex.printStackTrace();
         } catch (JwtException ex) {
