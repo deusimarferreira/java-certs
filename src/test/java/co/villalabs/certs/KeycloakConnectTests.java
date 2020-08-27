@@ -1,6 +1,5 @@
 package co.villalabs.certs;
 
-import java.io.DataOutputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
@@ -23,7 +22,7 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 
 public class KeycloakConnectTests {
-	private static String URL_AUTH = "https://{host}/auth";
+	private static String URL_AUTH = "https://{host}:8080/auth";
 	private static String REALM = "teste";
 	private static String URL_TOKEN_ENDPOINT = URL_AUTH + "/realms/" + REALM + "/protocol/openid-connect/token";
 	private static String URL_CERTS_ENDPOINT = URL_AUTH + "/realms/" + REALM + "/protocol/openid-connect/certs";
@@ -31,7 +30,7 @@ public class KeycloakConnectTests {
 	private static String JWT;
 	
 	@Test
-	public void testPasso1GetToken() {
+	public void testPasso1() {
         System.out.println("Keycloak GET Token JWT");
         
         String client = "";
@@ -51,18 +50,10 @@ public class KeycloakConnectTests {
             URL url = new URL(URL_TOKEN_ENDPOINT);
             HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
             con.setRequestMethod("POST");
-            con.setRequestProperty("Content-type", "application/xwww-form-urlencoded");
+            con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
             con.setRequestProperty("Content-Length", String.valueOf(paramsBytes.length));
             con.setDoOutput(true);
-            
-            DataOutputStream stream = new DataOutputStream(con.getOutputStream());
-            stream.write(paramsBytes);
-            stream.close();
-//            OutputStream stream = con.getOutputStream();
-//            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(stream, "UTF-8"));
-//            bw.write(params);
-//            bw.flush();
-//            bw.close();
+            con.getOutputStream().write(paramsBytes);
 
             Integer status = con.getResponseCode();
             if (status != 400 ) {
@@ -74,6 +65,10 @@ public class KeycloakConnectTests {
 	            	dados = reader.read();
 	            };
 	            reader.close();
+	            
+	            ObjectMapper mapper = new ObjectMapper();
+	            TokenResponse tokenResponse = mapper.readValue(json, TokenResponse.class);
+	            JWT = tokenResponse.accessToken;
 	            System.out.println(json);
             }
 
@@ -83,7 +78,7 @@ public class KeycloakConnectTests {
     }
 	
 	@Test
-	public void testPasso2GetKid() {
+	public void testPasso2() {
         System.out.println("Keycloak JWK - Recuperar JSON Web Key");
 
         try {
@@ -119,9 +114,9 @@ public class KeycloakConnectTests {
     }
 	
 	@Test
-	public void testPasso3ValidarToken() {
+	public void testPasso3() {
 		System.out.println("Jwk - Get Provider JSON Web Key");
-		
+        
         try {
         	
             JwkProvider provider = new UrlJwkProvider(new URL(URL_CERTS_ENDPOINT));
