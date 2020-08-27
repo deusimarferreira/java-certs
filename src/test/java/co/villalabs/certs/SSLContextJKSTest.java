@@ -33,10 +33,10 @@ public class SSLContextJKSTest {
             String code = "";
 
             URL url = new URL(REST_URI_TOKEN +
-                                    "?grant_type=authorization_code&code=" +
-                                    code +
-                                    "&redirect_uri=" +
-                                    REDIRECT_URL);
+	                        "?grant_type=authorization_code&code=" +
+	                        code +
+	                        "&redirect_uri=" +
+	                        REDIRECT_URL);
             HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
             con.setRequestMethod("POST");
             con.setRequestProperty("Authorization", "Basic " + auth);
